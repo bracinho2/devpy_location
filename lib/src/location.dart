@@ -4,7 +4,7 @@ import 'package:devpy_location/src/coordinates.dart';
 import 'package:location/location.dart';
 
 class DevPyLocation {
-  DevPyLocation._();
+  DevPyLocation();
 
   final location = Location();
 
