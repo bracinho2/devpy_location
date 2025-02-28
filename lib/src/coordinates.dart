@@ -7,7 +7,7 @@ import 'package:equatable/equatable.dart';
 /// {@endtemplate}
 class Coordinates extends Equatable {
   /// {@macro user}
-  const Coordinates({
+  const Coordinates._({
     this.latitude,
     this.longitude,
   });
@@ -18,8 +18,19 @@ class Coordinates extends Equatable {
   /// The current user's longitude
   final String? longitude;
 
+  /// Factory constructor to create an instance of [Coordinates].
+  factory Coordinates({
+    required String latitude,
+    required String longitude,
+  }) {
+    return Coordinates._(
+      latitude: latitude,
+      longitude: longitude,
+    );
+  }
+
   /// Empty coordinates which represents an empty state.
-  static const empty = Coordinates(latitude: '', longitude: '');
+  static var empty = Coordinates(latitude: '', longitude: '');
 
   /// Convenience getter to determine whether the current coordinates are empty.
   bool get isEmpty => this == Coordinates.empty;

@@ -8,19 +8,22 @@ abstract class DevPyLocation {
 }
 
 class LocationService implements DevPyLocation {
+  LocationService._();
+
   final location = Location();
+
   @override
   Future<Coordinates> getUserLocation() async {
     try {
       bool serviceEnabled;
-      PermissionStatus permissionGranted;
+      PermissionStatus permissionStatus;
 
-      permissionGranted = await location.hasPermission();
+      permissionStatus = await location.hasPermission();
 
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await location.requestPermission();
+      if (permissionStatus == PermissionStatus.denied) {
+        permissionStatus = await location.requestPermission();
 
-        if (permissionGranted != PermissionStatus.granted) {
+        if (permissionStatus != PermissionStatus.granted) {
           return Coordinates.empty;
         }
       }
