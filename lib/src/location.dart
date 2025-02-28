@@ -4,34 +4,32 @@ import 'package:devpy_location/src/coordinates.dart';
 import 'package:location/location.dart';
 
 class DevPyLocation {
-  DevPyLocation();
-
-  final location = Location();
+  const DevPyLocation();
 
   Future<Coordinates> getUserLocation() async {
     try {
       bool serviceEnabled;
       PermissionStatus permissionStatus;
 
-      permissionStatus = await location.hasPermission();
+      permissionStatus = await Location.instance.hasPermission();
 
       if (permissionStatus == PermissionStatus.denied) {
-        permissionStatus = await location.requestPermission();
+        permissionStatus = await Location.instance.requestPermission();
 
         if (permissionStatus != PermissionStatus.granted) {
           return Coordinates.empty;
         }
       }
 
-      serviceEnabled = await location.serviceEnabled();
+      serviceEnabled = await Location.instance.serviceEnabled();
       if (!serviceEnabled) {
-        serviceEnabled = await location.requestService();
+        serviceEnabled = await Location.instance.requestService();
         if (!serviceEnabled) {
           return Coordinates.empty;
         }
       }
 
-      final currentLocation = await location.getLocation();
+      final currentLocation = await Location.instance.getLocation();
 
       return Coordinates(
           latitude: currentLocation.latitude.toString(),
