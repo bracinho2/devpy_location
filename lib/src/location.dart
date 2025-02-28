@@ -3,16 +3,11 @@ import 'dart:developer';
 import 'package:devpy_location/src/coordinates.dart';
 import 'package:location/location.dart';
 
-abstract class DevPyLocation {
-  Future<Coordinates> getUserLocation();
-}
-
-class LocationService implements DevPyLocation {
-  LocationService._();
+class DevPyLocation {
+  DevPyLocation._();
 
   final location = Location();
 
-  @override
   Future<Coordinates> getUserLocation() async {
     try {
       bool serviceEnabled;
