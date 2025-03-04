@@ -6,26 +6,44 @@ import 'package:location/location.dart';
 class DevPyLocation {
   const DevPyLocation();
 
-  Future<Coordinates> getUserLocation() async {
+  Future<Coordinates> getLocationWithPermissionEnabled() async {
     try {
-      bool serviceEnabled;
-      PermissionStatus permissionStatus;
+      final currentLocation = await Location.instance.getLocation();
 
-      permissionStatus = await Location.instance.hasPermission();
+      return Coordinates(
+          latitude: currentLocation.latitude.toString(),
+          longitude: currentLocation.longitude.toString());
+    } catch (e) {
+      log(e.toString());
+      log(StackTrace.current.toString());
+      return Coordinates.empty;
+    }
+  }
 
-      if (permissionStatus == PermissionStatus.denied) {
-        permissionStatus = await Location.instance.requestPermission();
+  Future<Coordinates> getUserLocation({
+    bool permissionEnabled = false,
+  }) async {
+    try {
+      if (!permissionEnabled) {
+        bool serviceEnabled;
+        PermissionStatus permissionStatus;
 
-        if (permissionStatus != PermissionStatus.granted) {
-          return Coordinates.empty;
+        permissionStatus = await Location.instance.hasPermission();
+
+        if (permissionStatus == PermissionStatus.denied) {
+          permissionStatus = await Location.instance.requestPermission();
+
+          if (permissionStatus != PermissionStatus.granted) {
+            return Coordinates.empty;
+          }
         }
-      }
 
-      serviceEnabled = await Location.instance.serviceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await Location.instance.requestService();
+        serviceEnabled = await Location.instance.serviceEnabled();
         if (!serviceEnabled) {
-          return Coordinates.empty;
+          serviceEnabled = await Location.instance.requestService();
+          if (!serviceEnabled) {
+            return Coordinates.empty;
+          }
         }
       }
 
