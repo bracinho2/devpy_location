@@ -1,61 +1,48 @@
-import 'dart:developer';
+import 'package:geolocator/geolocator.dart';
 
-import 'package:devpy_location/src/coordinates.dart';
-import 'package:location/location.dart';
+import '../devpy_location.dart';
 
+/// A utility class for handling user location retrieval.
 class DevPyLocation {
-  const DevPyLocation();
+  /// Private constructor to prevent instantiation.
+  const DevPyLocation._();
 
-  Future<Coordinates> getLocationWithPermissionEnabled() async {
-    try {
-      final currentLocation = await Location.instance.getLocation();
-
-      return Coordinates(
-          latitude: currentLocation.latitude.toString(),
-          longitude: currentLocation.longitude.toString());
-    } catch (e) {
-      log(e.toString());
-      log(StackTrace.current.toString());
-      return Coordinates.empty;
+  /// Retrieves the current location of the user.
+  ///
+  /// This method checks whether location services are enabled and requests
+  /// the necessary permissions if not already granted. If the permissions
+  /// are denied permanently, an error is returned.
+  ///
+  /// Returns a [Coordinates] object containing latitude and longitude
+  /// of the current position.
+  ///
+  /// Throws an error if location services are disabled or permissions
+  /// are denied.
+  static Future<Coordinates> getUserLocation() async {
+    // Check if location services are enabled.
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return Future.error('Location services are disabled.');
     }
-  }
 
-  Future<Coordinates> getUserLocation({
-    bool permissionEnabled = false,
-  }) async {
-    try {
-      if (!permissionEnabled) {
-        bool serviceEnabled;
-        PermissionStatus permissionStatus;
-
-        permissionStatus = await Location.instance.hasPermission();
-
-        if (permissionStatus == PermissionStatus.denied) {
-          permissionStatus = await Location.instance.requestPermission();
-
-          if (permissionStatus != PermissionStatus.granted) {
-            return Coordinates.empty;
-          }
-        }
-
-        serviceEnabled = await Location.instance.serviceEnabled();
-        if (!serviceEnabled) {
-          serviceEnabled = await Location.instance.requestService();
-          if (!serviceEnabled) {
-            return Coordinates.empty;
-          }
-        }
+    // Check and request location permissions if needed.
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied.');
       }
-
-      final currentLocation = await Location.instance.getLocation();
-
-      return Coordinates(
-          latitude: currentLocation.latitude.toString(),
-          longitude: currentLocation.longitude.toString());
-    } catch (e) {
-      log(e.toString());
-      log(StackTrace.current.toString());
-      return Coordinates.empty;
     }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied. We cannot request permissions.');
+    }
+
+    // Retrieve and return the current position.
+    final position = await Geolocator.getCurrentPosition();
+    return Coordinates(
+      latitude: position.latitude,
+      longitude: position.longitude,
+    );
   }
 }
